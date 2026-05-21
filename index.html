@@ -63,17 +63,42 @@
             flex-shrink: 0;
         }
         
-        .list-item-text {
+        .list-item-text-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex: 1;
+            word-break: break-word;
+            cursor: pointer;
+        }
+        
+        .list-item-text {
             color: #333;
             font-size: 16px;
-            word-break: break-word;
             transition: all 0.2s ease;
         }
         
-        .list-item input[type="checkbox"]:checked ~ .list-item-text {
+        .list-item-qty {
+            background: #e7f3ff;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        
+        /* Handles striking through both item name and its quantity label */
+        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-text {
             text-decoration: line-through;
             color: #999;
+        }
+        
+        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-qty {
+            background: #f0f0f0;
+            color: #bbb;
+            text-decoration: line-through;
         }
         
         .info {
@@ -93,14 +118,6 @@
             color: #667eea;
         }
         
-        code {
-            background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            color: #d63384;
-        }
-        
         .loading {
             text-align: center;
             color: #666;
@@ -113,38 +130,31 @@
     <div class="container">
         <h1>🛒 Shopping List</h1>
         <ul class="shopping-list" id="shoppingList">
-            <li class="loading">Loading items from Google Sheets...</li>
+            <li class="loading">Loading items from your live sheet...</li>
         </ul>
         
         <div class="info">
-            <strong>📝 Live Updates Active:</strong>
-            Modify your Google Sheet items. Refresh this page to see the changes instantly.
+            <strong>📝 Multi-Column Support Active:</strong>
+            Column A manages the Item Name. Column B handles the Quantity.
         </div>
     </div>
     
     <script>
-        // Your exact Google Sheet web publication key
-        const PUB_KEY = '2PACX-1vRKlZy-N7c185Vcd6FQWpNZzRZWdUnx3LtxDLGYuPBwmVl6HrWnFU5NJAqpIDiqqncQmPPFSwrBXD8'; 
-        const URL = `https://google.com{PUB_KEY}/pub?output=csv`;
+        // Your newly updated multi-column web app URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx6FVb1nY9LnCxLGWCFaNtHJtWjXKumfvmuyttbNbIuJ-2yIpXJ0NNBjRmQmF2B6FWK/exec'; 
 
         const shoppingList = document.getElementById('shoppingList');
 
         async function loadShoppingList() {
             try {
-                const response = await fetch(URL);
-                if (!response.ok) throw new Error('Network response error');
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('API server down');
                 
-                const data = await response.text();
-                
-                // Parse rows, strip wrapping quotes, remove extra spacing
-                const items = data.split('\n')
-                    .map(row => row.replace(/^"|"$/g, '').trim())
-                    .filter(item => item !== "" && item.toLowerCase() !== "items");
-
+                const items = await response.json();
                 shoppingList.innerHTML = '';
                 
-                if(items.length === 0) {
-                    shoppingList.innerHTML = '<li class="loading">The sheet is empty!</li>';
+                if (!items || items.length === 0) {
+                    shoppingList.innerHTML = '<li class="loading">The sheet is empty! Add items under row 1.</li>';
                     return;
                 }
 
@@ -152,7 +162,13 @@
 
             } catch (error) {
                 console.error('Error fetching list:', error);
-                shoppingList.innerHTML = '<li class="list-item" style="color:#dc3545; font-weight:bold;">⚠️ Failed to load list. Check your publication settings.</li>';
+                shoppingList.innerHTML = `
+                    <li class="list-item" style="color:#dc3545; font-weight:bold; display:block; text-align:center;">
+                        ⚠️ Failed to load list.<br>
+                        <span style="font-size:12px; font-weight:normal; color:#666;">
+                            Ensure your Apps Script deployment is configured for access by "Anyone".
+                        </span>
+                    </li>`;
             }
         }
 
@@ -165,19 +181,33 @@
                 checkbox.type = 'checkbox';
                 checkbox.id = `item-${index}`;
                 
-                const label = document.createElement('label');
-                label.className = 'list-item-text';
-                label.htmlFor = `item-${index}`;
-                label.textContent = item;
+                // Outer structural wrapper layout box
+                const wrapper = document.createElement('label');
+                wrapper.className = 'list-item-text-wrapper';
+                wrapper.htmlFor = `item-${index}`;
+                
+                // Core text component
+                const textSpan = document.createElement('span');
+                textSpan.className = 'list-item-text';
+                textSpan.textContent = item.name;
+                wrapper.appendChild(textSpan);
+                
+                // Append custom quantity pill if data cell holds content
+                if (item.qty !== undefined && item.qty !== null && item.qty !== "") {
+                    const qtySpan = document.createElement('span');
+                    qtySpan.className = 'list-item-qty';
+                    qtySpan.textContent = item.qty;
+                    wrapper.appendChild(qtySpan);
+                }
                 
                 li.appendChild(checkbox);
-                li.appendChild(label);
+                li.appendChild(wrapper);
                 shoppingList.appendChild(li);
             });
         }
 
-        // Run application
         loadShoppingList();
     </script>
 </body>
 </html>
+
