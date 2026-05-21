@@ -100,52 +100,84 @@
             font-family: 'Courier New', monospace;
             color: #d63384;
         }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛒 Shopping List</h1>
-        <ul class="shopping-list" id="shoppingList"></ul>
+        <ul class="shopping-list" id="shoppingList">
+            <li class="loading">Loading items from Google Sheets...</li>
+        </ul>
         
         <div class="info">
-            <strong>📝 How to customize:</strong>
-            Edit the <code>items</code> array below in the code editor to add, remove, or rename items.
+            <strong>📝 Live Updates Active:</strong>
+            Modify your Google Sheet items. Refresh this page to see the changes instantly.
         </div>
     </div>
     
     <script>
-        // ===== EDIT THIS ARRAY TO CUSTOMIZE YOUR SHOPPING LIST =====
-        const items = [
-            "Milk",
-            "Bread",
-            "Eggs",
-            "Cheese",
-            "Apples",
-            "Chicken",
-            "Stuff",
-            "Rice"
-        ];
-        // ===== END CUSTOMIZATION =====
-        
+        // Your exact Google Sheet web publication key
+        const PUB_KEY = '2PACX-1vRKlZy-N7c185Vcd6FQWpNZzRZWdUnx3LtxDLGYuPBwmVl6HrWnFU5NJAqpIDiqqncQmPPFSwrBXD8'; 
+        const URL = `https://google.com{PUB_KEY}/pub?output=csv`;
+
         const shoppingList = document.getElementById('shoppingList');
-        
-        items.forEach((item, index) => {
-            const li = document.createElement('li');
-            li.className = 'list-item';
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `item-${index}`;
-            
-            const label = document.createElement('label');
-            label.className = 'list-item-text';
-            label.htmlFor = `item-${index}`;
-            label.textContent = item;
-            
-            li.appendChild(checkbox);
-            li.appendChild(label);
-            shoppingList.appendChild(li);
-        });
+
+        async function loadShoppingList() {
+            try {
+                const response = await fetch(URL);
+                if (!response.ok) throw new Error('Network response error');
+                
+                const data = await response.text();
+                
+                // Parse rows, strip wrapping quotes, remove extra spacing
+                const items = data.split('\n')
+                    .map(row => row.replace(/^"|"$/g, '').trim())
+                    .filter(item => item !== "" && item.toLowerCase() !== "items");
+
+                shoppingList.innerHTML = '';
+                
+                if(items.length === 0) {
+                    shoppingList.innerHTML = '<li class="loading">The sheet is empty!</li>';
+                    return;
+                }
+
+                renderList(items);
+
+            } catch (error) {
+                console.error('Error fetching list:', error);
+                shoppingList.innerHTML = '<li class="list-item" style="color:#dc3545; font-weight:bold;">⚠️ Failed to load list. Check your publication settings.</li>';
+            }
+        }
+
+        function renderList(items) {
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `item-${index}`;
+                
+                const label = document.createElement('label');
+                label.className = 'list-item-text';
+                label.htmlFor = `item-${index}`;
+                label.textContent = item;
+                
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                shoppingList.appendChild(li);
+            });
+        }
+
+        // Run application
+        loadShoppingList();
     </script>
 </body>
 </html>
