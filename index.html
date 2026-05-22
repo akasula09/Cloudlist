@@ -140,73 +140,91 @@
     </div>
     
     <script>
-        // Your newly updated multi-column web app URL
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx6FVb1nY9LnCxLGWCFaNtHJtWjXKumfvmuyttbNbIuJ-2yIpXJ0NNBjRmQmF2B6FWK/exec'; 
+      // Your newly updated multi-column web app URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbx6FVb1nY9LnCxLGWCFaNtHJtWjXKumfvmuyttbNbIuJ-2yIpXJ0NNBjRmQmF2B6FWK/exec'; 
 
-        const shoppingList = document.getElementById('shoppingList');
+const shoppingList = document.getElementById('shoppingList');
 
-        async function loadShoppingList() {
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('API server down');
-                
-                const items = await response.json();
-                shoppingList.innerHTML = '';
-                
-                if (!items || items.length === 0) {
-                    shoppingList.innerHTML = '<li class="loading">The sheet is empty! Add items under row 1.</li>';
-                    return;
-                }
+async function loadShoppingList() {
+    try {
+        // 1. Save currently checked items before wiping the list
+        // We use the item's name as a unique identifier
+        const checkedItems = new Set();
+        document.querySelectorAll('.list-item input[type="checkbox"]:checked').forEach(checkbox => {
+            const itemName = checkbox.nextElementSibling.querySelector('.list-item-text').textContent;
+            checkedItems.add(itemName);
+        });
 
-                renderList(items);
-
-            } catch (error) {
-                console.error('Error fetching list:', error);
-                shoppingList.innerHTML = `
-                    <li class="list-item" style="color:#dc3545; font-weight:bold; display:block; text-align:center;">
-                        ⚠️ Failed to load list.<br>
-                        <span style="font-size:12px; font-weight:normal; color:#666;">
-                            Ensure your Apps Script deployment is configured for access by "Anyone".
-                        </span>
-                    </li>`;
-            }
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('API server down');
+        
+        const items = await response.json();
+        shoppingList.innerHTML = '';
+        
+        if (!items || items.length === 0) {
+            shoppingList.innerHTML = '<li class="loading">The sheet is empty! Add items under row 1.</li>';
+            return;
         }
 
-        function renderList(items) {
-            items.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-item';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `item-${index}`;
-                
-                // Outer structural wrapper layout box
-                const wrapper = document.createElement('label');
-                wrapper.className = 'list-item-text-wrapper';
-                wrapper.htmlFor = `item-${index}`;
-                
-                // Core text component
-                const textSpan = document.createElement('span');
-                textSpan.className = 'list-item-text';
-                textSpan.textContent = item.name;
-                wrapper.appendChild(textSpan);
-                
-                // Append custom quantity pill if data cell holds content
-                if (item.qty !== undefined && item.qty !== null && item.qty !== "") {
-                    const qtySpan = document.createElement('span');
-                    qtySpan.className = 'list-item-qty';
-                    qtySpan.textContent = item.qty;
-                    wrapper.appendChild(qtySpan);
-                }
-                
-                li.appendChild(checkbox);
-                li.appendChild(wrapper);
-                shoppingList.appendChild(li);
-            });
-        }
+        // Pass the saved states to the render function
+        renderList(items, checkedItems);
 
-        loadShoppingList();
+    } catch (error) {
+        console.error('Error fetching list:', error);
+        // Only show error if the list is completely empty so we don't destroy an existing list on a brief network blip
+        if (shoppingList.children.length === 0 || shoppingList.querySelector('.loading')) {
+            shoppingList.innerHTML = `
+                <li class="list-item" style="color:#dc3545; font-weight:bold; display:block; text-align:center;">
+                    ⚠️ Failed to load list.<br>
+                    <span style="font-size:12px; font-weight:normal; color:#666;">
+                        Ensure your Apps Script deployment is configured for access by "Anyone".
+                    </span>
+                </li>`;
+        }
+    }
+}
+
+function renderList(items, checkedItems) {
+    items.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `item-${index}`;
+        
+        // 2. Re-apply the checked state if this item was checked before the refresh
+        if (checkedItems && checkedItems.has(item.name)) {
+            checkbox.checked = true;
+        }
+        
+        const wrapper = document.createElement('label');
+        wrapper.className = 'list-item-text-wrapper';
+        wrapper.htmlFor = `item-${index}`;
+        
+        const textSpan = document.createElement('span');
+        textSpan.className = 'list-item-text';
+        textSpan.textContent = item.name;
+        wrapper.appendChild(textSpan);
+        
+        if (item.qty !== undefined && item.qty !== null && item.qty !== "") {
+            const qtySpan = document.createElement('span');
+            qtySpan.className = 'list-item-qty';
+            qtySpan.textContent = item.qty;
+            wrapper.appendChild(qtySpan);
+        }
+        
+        li.appendChild(checkbox);
+        li.appendChild(wrapper);
+        shoppingList.appendChild(li);
+    });
+}
+
+// 3. Initial load
+loadShoppingList();
+
+// 4. Auto-refresh every 15 seconds (15000 milliseconds)
+setInterval(loadShoppingList, 15000);
     </script>
 </body>
 </html>
