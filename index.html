@@ -5,125 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping List</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 500px; width: 100%; padding: 30px; }
+        h1 { color: #333; margin-bottom: 30px; text-align: center; font-size: 28px; }
+        .shopping-list { list-style: none; }
+        .list-item { display: flex; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px; transition: all 0.3s ease; }
+        .list-item:hover { background: #e9ecef; }
+        .list-item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; margin-right: 15px; flex-shrink: 0; }
+        .list-item-text-wrapper { display: flex; justify-content: space-between; align-items: center; flex: 1; word-break: break-word; cursor: pointer; }
+        .list-item-text { color: #333; font-size: 16px; transition: all 0.2s ease; }
+        .list-item-qty { background: #e7f3ff; color: #667eea; font-size: 13px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-left: 10px; white-space: nowrap; }
+        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-text { text-decoration: line-through; color: #999; }
+        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-qty { background: #f0f0f0; color: #bbb; text-decoration: line-through; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 100%;
-            padding: 30px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 28px;
-        }
-        
-        .shopping-list {
-            list-style: none;
-        }
-        
-        .list-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .list-item:hover {
-            background: #e9ecef;
-        }
-        
-        .list-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-        
-        .list-item-text-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex: 1;
-            word-break: break-word;
-            cursor: pointer;
-        }
-        
-        .list-item-text {
-            color: #333;
-            font-size: 16px;
-            transition: all 0.2s ease;
-        }
-        
-        .list-item-qty {
-            background: #e7f3ff;
-            color: #667eea;
-            font-size: 13px;
-            font-weight: bold;
-            padding: 4px 10px;
-            border-radius: 20px;
-            margin-left: 10px;
-            white-space: nowrap;
-        }
-        
-        /* Handles striking through both item name and its quantity label */
-        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-text {
-            text-decoration: line-through;
-            color: #999;
-        }
-        
-        .list-item input[type="checkbox"]:checked ~ .list-item-text-wrapper .list-item-qty {
-            background: #f0f0f0;
-            color: #bbb;
-            text-decoration: line-through;
-        }
-        
-        .info {
-            margin-top: 30px;
-            padding: 15px;
-            background: #e7f3ff;
-            border-left: 4px solid #667eea;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .info strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #667eea;
-        }
-        
-        .loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 20px;
-        }
+        .notepad { margin-top: 30px; padding-top: 20px; border-top: 2px solid #f8f9fa; }
+        .notepad textarea { width: 100%; height: 80px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical; }
+
+        /* Smart Assistant Box */
+        .smart-box { margin-top: 20px; padding: 15px; background: #fdf6e3; border: 1px solid #eec; border-radius: 8px; font-size: 13px; color: #555; }
+        .smart-box strong { color: #d68910; display: block; margin-bottom: 5px; }
+
+        .loading { text-align: center; color: #666; font-style: italic; padding: 20px; }
     </style>
 </head>
 <body>
@@ -133,99 +36,92 @@
             <li class="loading">Loading items from your live sheet...</li>
         </ul>
         
-        <div class="info">
-            <strong>📝 Multi-Column Support Active:</strong>
-            Column A manages the Item Name. Column B handles the Quantity.
+        <div class="smart-box" id="smartBox">
+            <strong>💡 Smart Assistant:</strong>
+            Scanning your items for nutrition and usage tips...
+        </div>
+
+        <div class="notepad">
+            <textarea placeholder="Write notes about your items here..."></textarea>
         </div>
     </div>
-    
+
     <script>
-      // Your newly updated multi-column web app URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbx6FVb1nY9LnCxLGWCFaNtHJtWjXKumfvmuyttbNbIuJ-2yIpXJ0NNBjRmQmF2B6FWK/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx6FVb1nY9LnCxLGWCFaNtHJtWjXKumfvmuyttbNbIuJ-2yIpXJ0NNBjRmQmF2B6FWK/exec'; 
+        const shoppingList = document.getElementById('shoppingList');
+        const smartBox = document.getElementById('smartBox');
 
-const shoppingList = document.getElementById('shoppingList');
+        // The "Brain"
+       // The "Brain"
+       // The "Brain"
+        const knowledgeBase = {
+            'apple': 'Apples: High in fiber. Store away from other produce to prevent premature ripening.',
+            'milk': 'Milk: Check the date! Store at the back of the fridge for consistent temperature.',
+            'egg': 'Eggs: Keep in the main fridge body. They last 3-5 weeks if kept chilled.',
+            'bread': 'Bread: Store in a dry place. Freeze half if you won\'t finish it in 3 days.',
+            'spinach': 'Spinach: Store with a paper towel in a sealed bag to absorb moisture.',
+            'chicken': 'Chicken: Keep sealed on the bottom shelf to prevent cross-contamination.',
+            'mutton': 'Mutton: Keep sealed on the bottom area of your fridge to stop bacteria from reaching your other food.',
+            'quinoa': 'Quinoa: Store in a cool, dry place. Has long expiry dates, so don\'t stress!',
+            'tomato': 'Tomatoes: Keep in your refrigerator or a cabinet. They taste best chilled.',
+            'avocado': 'Avocados: Store on the counter until ripe, then move to the fridge to slow ripening.',
+            'mango': 'Mangoes: Store in a refrigerator; they can last over a month depending on the type.',
+            'lentils': 'Lentils: Store in an airtight container in a cool, dark pantry for up to a year.',
+            'cereal': 'Cereal: Keep the inner bag tightly closed to ensure freshness and crunch.',
+            'cookies': 'Cookies: Store in an airtight container to keep them from going soft.',
+            'hot chocolate mix': 'Hot Chocolate Mix: Keep in a cool, dry place to prevent clumping from humidity.',
+            'gummies': 'Gummies: Store in a cool, dark place away from heat to prevent melting or sticking.',
+            'chips': 'Chips: Keep the bag clipped tightly or use an airtight container to maintain crispiness.',
+            // Added Indian Kitchen Staples
+            'rice': 'Rice: Store in a dry, airtight container to protect from moisture and pests.',
+            'dal': 'Dal: Keep in an airtight container in a cool, dark place to maintain texture and nutrition.',
+            'atta': 'Atta (Flour): Best kept in a sealed container; avoid moisture as it can spoil the dough quality.',
+            'turmeric': 'Turmeric (Haldi): Keep in an opaque, airtight jar away from light to preserve its potency and color.',
+            'ghee': 'Ghee: Store in a cool, dark place; it does not require refrigeration and stays stable for months.'
+        };        async function loadShoppingList() {    
+            try {        
+                const response = await fetch(API_URL);        
+                const items = await response.json();        
+                shoppingList.innerHTML = '';                
+                
+                // Logic to collect all relevant tips
+                let activeTips = [];
+                items.forEach(item => {
+                    const name = item.name.toLowerCase();
+                    for (let key in knowledgeBase) {
+                        if (name.includes(key.toLowerCase())) {
+                            if (!activeTips.includes(knowledgeBase[key])) {
+                                activeTips.push(knowledgeBase[key]);
+                            }
+                        }
+                    }
+                });
 
-async function loadShoppingList() {
-    try {
-        // 1. Save currently checked items before wiping the list
-        // We use the item's name as a unique identifier
-        const checkedItems = new Set();
-        document.querySelectorAll('.list-item input[type="checkbox"]:checked').forEach(checkbox => {
-            const itemName = checkbox.nextElementSibling.querySelector('.list-item-text').textContent;
-            checkedItems.add(itemName);
-        });
+                // Display tips
+                if (activeTips.length > 0) {
+                    smartBox.innerHTML = `<strong>💡 Smart Assistant:</strong><br>${activeTips.join('<br>')}`;
+                } else {
+                    smartBox.innerHTML = '<strong>💡 Smart Assistant:</strong> Ready for your trip! Don\'t forget to bring reusable bags.';
+                }
 
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('API server down');
-        
-        const items = await response.json();
-        shoppingList.innerHTML = '';
-        
-        if (!items || items.length === 0) {
-            shoppingList.innerHTML = '<li class="loading">The sheet is empty! Add items under row 1.</li>';
-            return;
+                // Render list items
+                items.forEach((item, index) => {        
+                    const li = document.createElement('li');        
+                    li.className = 'list-item';        
+                    li.innerHTML = `
+                        <input type="checkbox" id="item-${index}">
+                        <label class="list-item-text-wrapper" for="item-${index}">
+                            <span class="list-item-text">${item.name}</span>
+                            ${item.qty ? `<span class="list-item-qty">${item.qty}</span>` : ''}
+                        </label>
+                    `;
+                    shoppingList.appendChild(li);    
+                });
+            } catch (error) { console.error(error); }
         }
-
-        // Pass the saved states to the render function
-        renderList(items, checkedItems);
-
-    } catch (error) {
-        console.error('Error fetching list:', error);
-        // Only show error if the list is completely empty so we don't destroy an existing list on a brief network blip
-        if (shoppingList.children.length === 0 || shoppingList.querySelector('.loading')) {
-            shoppingList.innerHTML = `
-                <li class="list-item" style="color:#dc3545; font-weight:bold; display:block; text-align:center;">
-                    ⚠️ Failed to load list.<br>
-                    <span style="font-size:12px; font-weight:normal; color:#666;">
-                        Ensure your Apps Script deployment is configured for access by "Anyone".
-                    </span>
-                </li>`;
-        }
-    }
-}
-
-function renderList(items, checkedItems) {
-    items.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.className = 'list-item';
         
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `item-${index}`;
-        
-        // 2. Re-apply the checked state if this item was checked before the refresh
-        if (checkedItems && checkedItems.has(item.name)) {
-            checkbox.checked = true;
-        }
-        
-        const wrapper = document.createElement('label');
-        wrapper.className = 'list-item-text-wrapper';
-        wrapper.htmlFor = `item-${index}`;
-        
-        const textSpan = document.createElement('span');
-        textSpan.className = 'list-item-text';
-        textSpan.textContent = item.name;
-        wrapper.appendChild(textSpan);
-        
-        if (item.qty !== undefined && item.qty !== null && item.qty !== "") {
-            const qtySpan = document.createElement('span');
-            qtySpan.className = 'list-item-qty';
-            qtySpan.textContent = item.qty;
-            wrapper.appendChild(qtySpan);
-        }
-        
-        li.appendChild(checkbox);
-        li.appendChild(wrapper);
-        shoppingList.appendChild(li);
-    });
-}
-
-// 3. Initial load
-loadShoppingList();
-
-// 4. Auto-refresh every 15 seconds (10000 milliseconds)
-setInterval(loadShoppingList, 1000);
+        loadShoppingList();
+        setInterval(loadShoppingList, 10000); 
     </script>
 </body>
 </html>
-
